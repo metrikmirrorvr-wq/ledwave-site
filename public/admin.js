@@ -119,6 +119,8 @@
           <h3>Ícone do separador (favicon)</h3>
           <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">${s.favicon ? `<img src="${esc(s.favicon)}" alt="" style="width:32px;height:32px;object-fit:contain">` : ''}<label class="btn sm" style="margin:0">⬆ Carregar ícone (quadrado)<input type="file" id="fav-file" accept="image/png,image/svg+xml" hidden></label><span class="small muted">Opcional. Se faltar, usa o logótipo.</span></div>
           <input type="hidden" name="favicon" id="s-favicon" value="${esc(s.favicon)}">
+          <h3>Fotos nos ecrãs da página inicial</h3>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px">${[1, 2].map((n) => `<div style="display:grid;gap:6px;justify-items:start"><span class="small muted">${n === 1 ? 'Totem grande' : 'Totem pequeno'}</span><img id="hero${n}-prev" src="${esc(s['heroImage' + n] || '/img/hero-' + n + '.jpg')}" alt="" style="width:120px;height:120px;object-fit:cover;border-radius:8px;background:#eef1f6"><label class="btn sm" style="margin:0">⬆ Trocar foto<input type="file" data-hero="${n}" accept="image/*" hidden></label><input type="hidden" name="heroImage${n}" id="s-heroImage${n}" value="${esc(s['heroImage' + n])}"></div>`).join('')}</div>
           <div class="grid2">${f('brand', 'Nome da marca no cabeçalho')}${f('brandSub', 'Subtítulo da marca')}</div>
           ${f('announcement', 'Barra de aviso no topo do site (opcional)', 'Ex.: Portes grátis em Portugal Continental até 31/12')}
           <label class="check"><input type="checkbox" id="s-showDemoBar" ${s.showDemoBar ? 'checked' : ''}> Mostrar aviso "Pré-visualização: preços provisórios"</label>
@@ -332,6 +334,11 @@
   // Logótipo / favicon: carregar imagem e pré-visualizar
   const readData = (f) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
   document.addEventListener('change', async (e) => {
+    if (e.target.dataset.hero) {
+      const f = e.target.files[0]; if (!f) return; const n = e.target.dataset.hero;
+      try { const { url } = await api('/upload', { method: 'POST', body: { data: await readData(f) } }); $('#s-heroImage' + n).value = url; $('#hero' + n + '-prev').src = url; toast('Foto carregada. Carregue em "Guardar definições".'); } catch (x) { toast(x.message); }
+      return;
+    }
     if (e.target.id !== 'logo-file' && e.target.id !== 'fav-file') return;
     const f = e.target.files[0]; if (!f) return;
     try {

@@ -17,7 +17,16 @@
 
   /* ---------- Ilustrações SVG dos produtos (substituir por fotos oficiais) ---------- */
   let uid = 0;
+  let SCREEN_IMG = null; // foto a mostrar no ecrã da ilustração (só na página inicial)
   function screen(x, y, w, h, id) {
+    if (SCREEN_IMG) {
+      const cols = Math.max(4, Math.round(w / 4)), rows = Math.max(4, Math.round(h / 4));
+      let grid = '';
+      for (let i = 1; i < cols; i++) grid += `<line x1="${x + i * w / cols}" y1="${y}" x2="${x + i * w / cols}" y2="${y + h}" stroke="#000" stroke-opacity=".12" stroke-width=".35"/>`;
+      for (let j = 1; j < rows; j++) grid += `<line x1="${x}" y1="${y + j * h / rows}" x2="${x + w}" y2="${y + j * h / rows}" stroke="#000" stroke-opacity=".12" stroke-width=".35"/>`;
+      return `<clipPath id="c${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath>
+        <image href="${esc(SCREEN_IMG)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#c${id})"/>${grid}`;
+    }
     const cols = Math.max(4, Math.round(w / 9)), rows = Math.max(4, Math.round(h / 9));
     let dots = '';
     for (let i = 0; i < cols; i++) dots += `<line x1="${x + (i + .5) * w / cols}" y1="${y}" x2="${x + (i + .5) * w / cols}" y2="${y + h}" stroke="#000" stroke-opacity=".18" stroke-width=".6"/>`;
@@ -28,6 +37,7 @@
       <rect x="${x + w * .12}" y="${y + h * .72}" width="${w * .4}" height="${h * .04}" rx="2" fill="#fff" fill-opacity=".5"/>
       <rect x="${x + w * .12}" y="${y + h * .82}" width="${w * .3}" height="${h * .07}" rx="${h * .035}" fill="#05070c" fill-opacity=".7"/></g>${dots}`;
   }
+  function artImg(kind, img) { SCREEN_IMG = img || null; try { return art(kind); } finally { SCREEN_IMG = null; } }
   function art(kind) {
     const id = ++uid;
     const defs = `<defs><linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#19d3ff"/><stop offset=".55" stop-color="#7a5cff"/><stop offset="1" stop-color="#ff3d8b"/></linearGradient></defs>`;
@@ -103,7 +113,7 @@
           <div class="hero-ctas"><a class="btn btn-primary" href="#/produtos">Ver produtos e preços →</a><a class="btn btn-ghost" href="#/orcamento">Pedir orçamento</a></div>
           <div class="hero-badges"><span>Entrega em Portugal Continental e Ilhas</span><span>MB WAY, Multibanco e cartão</span><span>Instalação e garantia</span></div>
         </div>
-        <div class="hero-art"><div style="height:380px">${art('totem-out')}</div><div style="height:300px">${art('touch')}</div></div>
+        <div class="hero-art"><div style="height:380px">${artImg('totem-out', S().heroImage1 || '/img/hero-1.jpg')}</div><div style="height:300px">${artImg('touch', S().heroImage2 || '/img/hero-2.jpg')}</div></div>
       </div></section>
 
       <section class="alt"><div class="wrap">
