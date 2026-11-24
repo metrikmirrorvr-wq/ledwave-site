@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Backoffice LEDWAVE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<div id="login" class="login" hidden>
+  <form id="login-form" class="login-card">
+    <div class="brand"><span class="mark"></span> Backoffice <b>LEDWAVE</b></div>
+    <label>Utilizador<input id="l-user" name="user" autocomplete="username" required value="admin"></label>
+    <label>Palavra-passe<input id="l-pass" name="password" type="password" autocomplete="current-password" required></label>
+    <div id="login-msg"></div>
+    <button class="btn primary block" type="submit">Entrar</button>
+    <a class="muted small" href="/">← Voltar ao site</a>
+  </form>
+</div>
+
+<div id="shell" class="shell" hidden>
+  <aside class="side" id="side">
+    <div class="brand"><span class="mark"></span> <span>LEDWAVE<small>Backoffice</small></span></div>
+    <nav>
+      <a href="#painel" data-v="painel">📊 Painel</a>
+      <a href="#encomendas" data-v="encomendas">🧾 Encomendas <span class="pill" id="n-orders" hidden></span></a>
+      <a href="#orcamentos" data-v="orcamentos">💬 Orçamentos <span class="pill" id="n-quotes" hidden></span></a>
+      <a href="#produtos" data-v="produtos">📦 Produtos</a>
+      <a href="#clientes" data-v="clientes">👥 Clientes</a>
+      <a href="#definicoes" data-v="definicoes">⚙️ Definições</a>
+    </nav>
+    <div class="side-foot">
+      <a href="/" target="_blank" rel="noopener">Ver site ↗</a>
+      <button class="link" id="logout">Terminar sessão</button>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="bar"><button class="menu" id="menu" aria-label="Menu">☰</button><h1 id="title">Painel</h1><div id="bar-actions"></div></header>
+    <main id="view"></main>
+  </div>
+</div>
+<div class="drawer-bg" id="drawer-bg" hidden></div>
+<aside class="drawer" id="drawer" hidden></aside>
+<div class="toast" id="toast"></div>
+<script src="/admin.js"></script>
+</body>
+</html>
