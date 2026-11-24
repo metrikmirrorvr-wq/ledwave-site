@@ -19,7 +19,7 @@ app.set('trust proxy', 1);
 /* ------------------------------------------------------------------ */
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const DEFAULT_SETTINGS = {
-  brand: 'LEDWAVE', brandSub: 'PORTUGAL',
+  brand: 'LEDWAVE', brandSub: 'PORTUGAL', logo: '', logoHeight: '40', favicon: '', showBrandText: true,
   companyName: 'Metrikmirror, Lda.', nif: '', address: '', postcode: '', city: '',
   email: '', phone: '', whatsapp: '', hours: 'Segunda a sexta, 9h00–13h00 e 14h00–18h00',
   instagram: '', facebook: '', linkedin: '',
@@ -341,6 +341,8 @@ A.put('/settings', (req, res) => {
     const cats = b.categories.map((c) => ({ slug: slugify(c.slug || c.name), name: str(c.name, 60) })).filter((c) => c.slug && c.name);
     if (cats.length) db.categories = cats;
   }
+  for (const k of ['logo', 'favicon']) if (db.settings[k] && !/^(https:\/\/|\/uploads\/)/.test(db.settings[k])) db.settings[k] = '';
+  db.settings.logoHeight = String(Math.min(120, Math.max(20, parseInt(db.settings.logoHeight, 10) || 40)));
   save(); res.json({ settings: db.settings, categories: db.categories });
 });
 A.post('/password', (req, res) => {

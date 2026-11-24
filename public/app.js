@@ -397,6 +397,18 @@
   function renderChrome() {
     document.querySelectorAll('[data-brand]').forEach((e) => (e.textContent = S().brand || 'LEDWAVE'));
     document.querySelectorAll('[data-brand-sub]').forEach((e) => (e.textContent = S().brandSub || 'PORTUGAL'));
+    // Logótipo carregado no backoffice (Definições → Marca)
+    document.querySelectorAll('a.logo').forEach((a) => {
+      const mark = a.querySelector('.logo-mark'), text = mark?.nextElementSibling || a.querySelector('span:last-child');
+      let img = a.querySelector('img.logo-img');
+      if (S().logo) {
+        if (!img) { img = document.createElement('img'); img.className = 'logo-img'; a.prepend(img); }
+        img.src = S().logo; img.alt = S().brand || 'Logótipo'; img.style.height = (S().logoHeight || 40) + 'px';
+        if (mark) mark.hidden = true;
+      } else { img?.remove(); if (mark) mark.hidden = false; }
+      if (text && text !== img) text.hidden = !!S().logo && S().showBrandText === false;
+    });
+    if (S().favicon || S().logo) { const l = document.querySelector('link[rel=icon]'); if (l) l.href = S().favicon || S().logo; }
     $('#f-contact').innerHTML = [
       S().email ? `<li><a href="mailto:${esc(S().email)}">${esc(S().email)}</a></li>` : `<li>${val('email', 'Email a definir')}</li>`,
       S().phone ? `<li><a href="${telHref(S().phone)}">${esc(S().phone)}</a></li>` : `<li>${val('phone', 'Telefone a definir')}</li>`,

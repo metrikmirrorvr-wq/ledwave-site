@@ -104,6 +104,21 @@
           <div class="grid3">${f('instagram', 'Instagram (URL)')}${f('facebook', 'Facebook (URL)')}${f('linkedin', 'LinkedIn (URL)')}</div>
         </div>
         <div class="card"><h2>Marca e avisos</h2>
+          <h3 style="margin-top:0">Logótipo</h3>
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <div id="logo-prev" style="background:#07090f;border-radius:10px;padding:14px 18px;min-width:160px;min-height:68px;display:grid;place-items:center">${s.logo ? `<img src="${esc(s.logo)}" alt="" style="height:${esc(s.logoHeight || 40)}px;max-width:240px;object-fit:contain">` : '<span class="small" style="color:#8b95a9">Sem logótipo</span>'}</div>
+            <div style="display:grid;gap:8px">
+              <label class="btn" style="margin:0">⬆ Carregar logótipo<input type="file" id="logo-file" accept="image/png,image/svg+xml,image/webp,image/jpeg" hidden></label>
+              <button type="button" class="btn sm danger" id="logo-rm" ${s.logo ? '' : 'hidden'}>Remover logótipo</button>
+            </div>
+          </div>
+          <input type="hidden" name="logo" id="s-logo" value="${esc(s.logo)}">
+          <div class="grid2"><label>Altura no cabeçalho (px)<input name="logoHeight" id="s-logoHeight" type="number" min="20" max="120" value="${esc(s.logoHeight || 40)}"></label>
+          <label class="check" style="align-self:end"><input type="checkbox" id="s-showBrandText" ${s.showBrandText !== false ? 'checked' : ''}> Mostrar também o nome da marca ao lado do logótipo</label></div>
+          <p class="small muted">Use um PNG ou SVG com fundo transparente e cores claras: o cabeçalho do site é escuro. Depois carregue em "Guardar definições".</p>
+          <h3>Ícone do separador (favicon)</h3>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">${s.favicon ? `<img src="${esc(s.favicon)}" alt="" style="width:32px;height:32px;object-fit:contain">` : ''}<label class="btn sm" style="margin:0">⬆ Carregar ícone (quadrado)<input type="file" id="fav-file" accept="image/png,image/svg+xml" hidden></label><span class="small muted">Opcional. Se faltar, usa o logótipo.</span></div>
+          <input type="hidden" name="favicon" id="s-favicon" value="${esc(s.favicon)}">
           <div class="grid2">${f('brand', 'Nome da marca no cabeçalho')}${f('brandSub', 'Subtítulo da marca')}</div>
           ${f('announcement', 'Barra de aviso no topo do site (opcional)', 'Ex.: Portes grátis em Portugal Continental até 31/12')}
           <label class="check"><input type="checkbox" id="s-showDemoBar" ${s.showDemoBar ? 'checked' : ''}> Mostrar aviso "Pré-visualização: preços provisórios"</label>
@@ -314,11 +329,25 @@
       await api('/products/reorder', { method: 'POST', body: { ids: list.map((x) => x.id) } }); tables.produtos();
     }
   });
-  document.addEventListener('input', (e) => { if (e.target.closest('.toolbar')) tables[current]?.(); });
+  // Logótipo / favicon: carregar imagem e pré-visualizar
+  const readData = (f) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+  document.addEventListener('change', async (e) => {
+    if (e.target.id !== 'logo-file' && e.target.id !== 'fav-file') return;
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const { url } = await api('/upload', { method: 'POST', body: { data: await readData(f) } });
+      if (e.target.id === 'logo-file') { $('#s-logo').value = url; $('#logo-prev').innerHTML = `<img src="${esc(url)}" alt="" style="height:${esc($('#s-logoHeight').value || 40)}px;max-width:240px;object-fit:contain">`; $('#logo-rm').hidden = false; }
+      else { $('#s-favicon').value = url; e.target.closest('div').insertAdjacentHTML('afterbegin', `<img src="${esc(url)}" alt="" style="width:32px;height:32px;object-fit:contain">`); }
+      toast('Imagem carregada. Carregue em "Guardar definições".');
+    } catch (x) { toast(x.message); }
+  });
+  document.addEventListener('click', (e) => { if (e.target.id === 'logo-rm') { $('#s-logo').value = ''; $('#logo-prev').innerHTML = '<span class="small" style="color:#8b95a9">Sem logótipo</span>'; e.target.hidden = true; } });
+  document.addEventListener('input', (e) => {
+    if (e.target.id === 's-logoHeight') { const i = $('#logo-prev img'); if (i) i.style.height = (e.target.value || 40) + 'px'; } if (e.target.closest('.toolbar')) tables[current]?.(); });
   document.addEventListener('submit', async (e) => {
     if (e.target.id === 'settings-form') {
       e.preventDefault();
-      const settings = {}; $$('#settings-form input[name]').forEach((i) => (settings[i.name] = i.value)); settings.showDemoBar = $('#s-showDemoBar').checked;
+      const settings = {}; $$('#settings-form input[name]').forEach((i) => (settings[i.name] = i.value)); settings.showDemoBar = $('#s-showDemoBar').checked; settings.showBrandText = $('#s-showBrandText').checked;
       const categories = $('#s-cats').value.split('\n').map((n) => n.trim()).filter(Boolean).map((name) => ({ name, slug: CATS.find((c) => c.name === name)?.slug || '' }));
       try { const r = await api('/settings', { method: 'PUT', body: { settings, categories } }); CATS = r.categories; toast('Definições guardadas'); } catch (x) { toast(x.message); }
     }
